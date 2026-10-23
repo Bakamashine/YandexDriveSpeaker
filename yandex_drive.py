@@ -28,7 +28,7 @@ class YandexDrive:
                 "Accept": "application/json",
                 "Authorization": f"OAuth {self.access_key}",
             },
-            params={"path": self.dir_name},
+            params={"path": self.dir_name, "limit": 5000},
         )
         if r.status_code == 404:
             print("Directory is not found")
@@ -76,7 +76,7 @@ class YandexDrive:
             r = requests.get(
                 "https://cloud-api.yandex.net/v1/disk/resources/upload",
                 headers=self.headers,
-                params={"path": disk_path, "overwrite": "true", "limit": 5000},
+                params={"path": disk_path, "overwrite": "true"},
             )
             r.raise_for_status()
             href = r.json()["href"]
