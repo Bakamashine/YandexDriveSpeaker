@@ -4,12 +4,13 @@ import requests
 
 # curl -X GET --header 'Accept: application/json' --header 'Authorization: OAuth <Token>' 'https://cloud-api.yandex.net/v1/disk/resources?path=<dir>'
 
+
 class YandexDrive:
     def __init__(self, dir_name: str, access_key: str):
         self.dir_name = dir_name
         self.access_key = access_key
         self.headers = {"Authorization": f"OAuth {access_key}"}
-        print("Access_key: ",self.access_key)
+        print("Access_key: ", self.access_key)
         self.local_dir = Path("downloads")
 
     def parse_answer(self, answer: int):
@@ -29,6 +30,7 @@ class YandexDrive:
                 "Authorization": f"OAuth {self.access_key}",
             },
             params={"path": self.dir_name, "limit": 5000},
+            verify=False
         )
         if r.status_code == 404:
             print("Directory is not found")
@@ -42,20 +44,23 @@ class YandexDrive:
                 print(f"{self.dir_name}/{item['name']} - 500 error")
 
     def __try_download_from_dir(self, item):
-        r = requests.get(
-            "https://cloud-api.yandex.net/v1/disk/resources/download",
-            headers=self.headers,
-            params={"path": item["path"]},
-        )
-        if r.status_code >= 500:
-            return False
-        r.raise_for_status()
-        href = r.json()["href"]
+        try:
+            r = requests.get(
+                "https://cloud-api.yandex.net/v1/disk/resources/download",
+                headers=self.headers,
+                params={"path": item["path"]},
+                verify=False
+            )
 
-        data = requests.get(href)
-        data.raise_for_status()
-        (self.local_dir / item["name"]).write_bytes(data.content)
-        print(f"Downloaded: {item['name']}")
+            r.raise_for_status()
+            href = r.json()["href"]
+
+            data = requests.get(href)
+            data.raise_for_status()
+            (self.local_dir / item["name"]).write_bytes(data.content)
+            print(f"Downloaded: {item['name']}")
+        except requests.exceptions.HTTPError:
+            return False
 
     def __upload_to_dir(self):
         self.local_dir.mkdir(exist_ok=True)
@@ -64,6 +69,7 @@ class YandexDrive:
             "https://cloud-api.yandex.net/v1/disk/resources",
             headers=self.headers,
             params={"path": self.dir_name, "limit": 5000},
+            verify=False
         )
         if r.status_code not in (201, 409):
             r.raise_for_status()
