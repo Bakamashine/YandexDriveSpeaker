@@ -17,6 +17,10 @@ menu: list[Menu] = [
         2,
         "upload_to_dir",
     ),
+    Menu(
+        3,
+        "just_decipher"
+    ),
 ]
 
 

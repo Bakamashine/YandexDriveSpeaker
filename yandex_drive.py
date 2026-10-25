@@ -1,12 +1,13 @@
 import os
 from pathlib import Path
 import requests
+from cipher import Cipher
 
 # curl -X GET --header 'Accept: application/json' --header 'Authorization: OAuth <Token>' 'https://cloud-api.yandex.net/v1/disk/resources?path=<dir>'
 
 
 class YandexDrive:
-    def __init__(self, dir_name: str, access_key: str):
+    def __init__(self, access_key: str, dir_name: str|None = None):
         self.dir_name = dir_name
         self.access_key = access_key
         self.headers = {"Authorization": f"OAuth {access_key}"}
@@ -18,7 +19,11 @@ class YandexDrive:
             self.__download_from_dir()
         elif answer == 2:
             self.__upload_to_dir()
+        elif answer == 3:
+            Cipher().all_decipher()
 
+    def setDir(self, dir_name: str) -> None:
+        self.dir_name= dir_name
     def __download_from_dir(self):
         self.local_dir.mkdir(exist_ok=True)
 
@@ -59,7 +64,8 @@ class YandexDrive:
             data.raise_for_status()
             (self.local_dir / item["name"]).write_bytes(data.content)
             print(f"Downloaded: {item['name']}")
-        except requests.exceptions.HTTPError:
+        except Exception as e:
+            print(f"Error  {e}")
             return False
 
     def __upload_to_dir(self):

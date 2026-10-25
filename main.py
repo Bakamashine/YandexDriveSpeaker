@@ -8,16 +8,18 @@ import shutil
 
 def main():
     default_dir = "downloads"
-    ydrive = YandexDrive(input("Your dir name: "), get_value("access_key"))
+    ydrive = YandexDrive(get_value("access_key"))
     cph = Cipher(try_get_value("public"), try_get_value("private"))
+    answer = menu.print_menu()
+    if answer == 1 or answer == 2:
+        if (
+            path.exists(default_dir)
+            and input("Downloads folder exists. Remove? [y/n] ") == "y"
+        ):
+            shutil.rmtree(default_dir)
+        ydrive.setDir(input("Your dir in yandex drive: "))
 
-    if (
-        path.exists(default_dir)
-        and input("Downloads folder exists. Remove? [y/n] ") == "y"
-    ):
-        shutil.rmtree(default_dir)
-
-    ydrive.parse_answer(menu.print_menu())
+    ydrive.parse_answer(answer)
     cph.all_decipher(default_dir)
 
 
