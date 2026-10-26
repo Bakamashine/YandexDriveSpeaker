@@ -30,18 +30,14 @@ class Cipher:
 
         gpgbinary = find_gpg()
         if gpgbinary is None:
-            raise RuntimeError(
-                "gpg was not found. Install GnuPG or add it to PATH."
-            )
+            raise RuntimeError("gpg was not found. Install GnuPG or add it to PATH.")
 
         os.makedirs(self.gnupghome, exist_ok=True)
         self.gpg = gnupg.GPG(gpgbinary=gpgbinary, gnupghome=self.gnupghome)
         self.import_key(self.public)
         self.import_key(self.private)
-
-        if os.path.exists(self.deciphered_dir):
-            shutil.rmtree(self.deciphered_dir)
-        os.makedirs(self.deciphered_dir)
+        if os.path.exists(self.deciphered_dir) == False:
+            os.makedirs(self.deciphered_dir)
 
     def import_key(self, path: str):
         if not os.path.exists(path):

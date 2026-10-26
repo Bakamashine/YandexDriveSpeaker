@@ -7,7 +7,7 @@ from cipher import Cipher
 
 
 class YandexDrive:
-    def __init__(self, access_key: str, dir_name: str|None = None):
+    def __init__(self, access_key: str | None = None, dir_name: str | None = None):
         self.dir_name = dir_name
         self.access_key = access_key
         self.headers = {"Authorization": f"OAuth {access_key}"}
@@ -15,6 +15,8 @@ class YandexDrive:
         self.local_dir = Path("downloads")
 
     def parse_answer(self, answer: int):
+        if self.access_key is None:
+            raise Exception("Access key is None")
         if answer == 1:
             self.__download_from_dir()
         elif answer == 2:
@@ -23,7 +25,8 @@ class YandexDrive:
             Cipher().all_decipher()
 
     def setDir(self, dir_name: str) -> None:
-        self.dir_name= dir_name
+        self.dir_name = dir_name
+
     def __download_from_dir(self):
         self.local_dir.mkdir(exist_ok=True)
 
@@ -35,7 +38,7 @@ class YandexDrive:
                 "Authorization": f"OAuth {self.access_key}",
             },
             params={"path": self.dir_name, "limit": 5000},
-            verify=False
+            verify=False,
         )
         if r.status_code == 404:
             print("Directory is not found")
@@ -54,7 +57,7 @@ class YandexDrive:
                 "https://cloud-api.yandex.net/v1/disk/resources/download",
                 headers=self.headers,
                 params={"path": item["path"]},
-                verify=False
+                verify=False,
             )
 
             r.raise_for_status()
@@ -75,7 +78,7 @@ class YandexDrive:
             "https://cloud-api.yandex.net/v1/disk/resources",
             headers=self.headers,
             params={"path": self.dir_name, "limit": 5000},
-            verify=False
+            verify=False,
         )
         if r.status_code not in (201, 409):
             r.raise_for_status()
